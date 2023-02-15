@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  PrefViewer
+//  Preferences Viewer
 //
 //  Created by Jacob Hazelgrove on 2/7/23.
 //

@@ -1,58 +1,45 @@
 //
-//  ViewController.swift
+//  KeyValueStoreViewController.swift
 //  Preferences Viewer
 //
-//  Created by Jacob Hazelgrove on 2/7/23.
+//  Created by Jacob Hazelgrove on 2/15/23.
 //
 
 import Cocoa
 
-class ViewController: NSViewController {
-
+class KeyValueStoreViewController: NSViewController {
     
-    var keyValueStore: KeyValueStore?
+    
+    let keyValueStore: KeyValueStore
+    
+    init(_ keyValueStore: KeyValueStore) {
+        self.keyValueStore = keyValueStore
+        super.init(nibName: nil, bundle:  nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    @IBOutlet weak var tableView: NSTableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        if var store = KeyValueStore.keyValueStore(with: "com.apple.finder", name: "Finder"),
-//           let global = KeyValueStore.global {
-//            store.removingDuplicateKeys(in: global)
-//            
-//            keyValueStore = store
-//        }
-        /*
-        var pairs: [KeyValuePair] = []
-//        print("UserDefaults.standard: \(UserDefaults.standard.dictionaryRepresentation())")
-        let dictionary = UserDefaults.standard.dictionaryRepresentation()
-        let keys = dictionary.keys.sorted()
-        for key in keys {
-            if let value = dictionary[key] {
-                //print("\(key): \(value)")
-                let dataType = dataType(for: value)
-                pairs.append(KeyValuePair(key: key, dataType: dataType, value: value))
-            }
-        }
-        
-        
-        keyValueStore = KeyValueStore(identifier: UUID().uuidString, name: "Global", keyValuePairs: pairs)
-         */
-        reloadData()
+        tableView.reloadData()
     }
     
     
     func reloadData() {
-        guard let kvs = keyValueStore else { return }
-        
         var longestKeyCount = 0
         
-        for keyValuePair in kvs.keyValuePairs {
+        for keyValuePair in keyValueStore.keyValuePairs {
             let keyCount = keyValuePair.key.count
             if keyCount > longestKeyCount { longestKeyCount = keyCount }
         }
         
         
-        for keyValuePair in kvs.keyValuePairs {
+        for keyValuePair in keyValueStore.keyValuePairs {
             let keyCount = keyValuePair.key.count
             let spacesToAdd = longestKeyCount - keyCount
             print("\t\(String(repeating: " ", count: spacesToAdd))\(keyValuePair.key): \(kvpDescription(for: keyValuePair.value))")
@@ -141,35 +128,34 @@ class ViewController: NSViewController {
         
     }
     
-
+    
     override var representedObject: Any? {
         didSet {
-        // Update the view, if already loaded.
+            // Update the view, if already loaded.
         }
     }
-
-
+    
+    
 }
 
 
-//extension NSArray {
-//    var countString: String {
-//        if count == 1 {
-//            return "1 element"
-//        } else {
-//            return "\(count) elements"
-//        }
-//    }
-//}
+extension NSArray {
+    var countString: String {
+        if count == 1 {
+            return "1 element"
+        } else {
+            return "\(count) elements"
+        }
+    }
+}
 
-extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
+extension KeyValueStoreViewController: NSTableViewDataSource, NSTableViewDelegate {
     
     var keyValuePairCount: Int {
-        keyValueStore?.keyValuePairs.count ?? 0
+        keyValueStore.keyValuePairs.count
     }
     func keyValuePair(at index: Int) -> KeyValuePair? {
-        guard let kvs = keyValueStore else { return nil }
-        return kvs.keyValuePairs[index]
+        return keyValueStore.keyValuePairs[index]
     }
     
     func numberOfRows(in tableView: NSTableView) -> Int {
@@ -178,7 +164,7 @@ extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
     
     func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
         guard let tableColumn = tableColumn,
-                let kvp = keyValuePair(at: row) else {
+              let kvp = keyValuePair(at: row) else {
             return nil
         }
         
@@ -193,7 +179,8 @@ extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
         else if tableColumn.identifier == .init(rawValue: "value") {
             return kvpDescription(for: kvp.value)
         }
-
+        
         return nil
     }
 }
+
